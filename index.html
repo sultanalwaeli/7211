@@ -1,497 +1,1061 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
-<title>رصد الغياب - تطبيق الويب</title>
-<style>
-:root{ --brand:#115e59; --brand2:#0b8a6a; --ink:#0b1220; --muted:#5b6577; --stroke:#e6e9ef; --radius:16px; --bar:80px; --font-size:18px; --touch-target:44px;}
-*{box-sizing:border-box}
-body{margin:0;font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6;background:#0e1615;color:var(--ink);font-size:var(--font-size);-webkit-tap-highlight-color:transparent}
-.container{max-width:100%;margin:0 auto;padding:12px 10px calc(var(--bar) + env(safe-area-inset-bottom) + 10px)}
-.hero{border-radius:18px;color:#fff;padding:14px;background:linear-gradient(135deg,rgba(17,94,89,.95),rgba(11,138,106,.95));box-shadow:0 12px 30px rgba(0,0,0,.15);margin-bottom:12px}
-.hero-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
-.badge{background:rgba(15,23,42,.9);color:#fff;border-radius:20px;padding:8px 12px;font-weight:700;font-size:14px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
-.card{background:#fff;border:1px solid var(--stroke);border-radius:var(--radius);padding:12px;margin-bottom:10px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.grid3{display:grid;gap:8px;margin-bottom:8px;grid-template-columns:1fr 1fr 1fr}
-@media (max-width:768px){.grid3{grid-template-columns:1fr}:root{--font-size:16px}}
-.select,.btn{padding:14px;border:2px solid var(--stroke);border-radius:14px;background:#fff;font:inherit;font-size:var(--font-size);min-height:var(--touch-target);width:100%}
-.btn{border:none;font-weight:700;cursor:pointer;text-align:center;transition:all .2s ease}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-.primary{color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2))}
-.secondary{background:#f8fafc;color:var(--ink)}
-.danger{color:#fff;background:#dc2626}
-.sticky{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--stroke);padding:10px;display:flex;gap:8px;z-index:1000;box-shadow:0 -8px 20px rgba(0,0,0,.1);flex-wrap:wrap;justify-content:space-between}
-.actions-group{display:flex;gap:8px;flex-wrap:wrap;flex:1}
-.actions-group .btn{flex:1;min-width:140px}
-.name{font-weight:700;font-size:var(--font-size);flex:1}
-.meta{color:#64748b;font-size:14px}
-.toast{position:fixed;bottom:calc(var(--bar) + 80px);left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:16px 20px;border-radius:12px;display:none;z-index:1001;font-size:16px;max-width:90%;text-align:center;animation:toastSlide .3s ease-out;box-shadow:0 10px 25px rgba(0,0,0,.2)}
-@keyframes toastSlide{from{transform:translateX(-50%) translateY(100px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-.success-toast{background:linear-gradient(135deg,#10b981,#059669);animation:successToast .5s ease-out;font-weight:bold}
-@keyframes successToast{0%{transform:translateX(-50%) scale(.8);opacity:0}50%{transform:translateX(-50%) scale(1.05)}100%{transform:translateX(-50%) scale(1);opacity:1}}
-.list{max-height:50vh;overflow-y:auto;margin-top:8px;border:1px solid var(--stroke);border-radius:12px}
-.item{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #f1f5f9}
-.item:last-child{border-bottom:none}
-.item .tag{font-size:12px;border-radius:20px;padding:4px 8px;border:1px solid var(--stroke);color:#475569;white-space:nowrap}
-input[type="checkbox"]{transform:scale(1.3);margin:0;accent-color:var(--brand)}
-.status-list{display:flex;flex-wrap:wrap;gap:6px}
-.pill{padding:8px 12px;border-radius:20px;border:2px solid var(--stroke);background:#fff;cursor:pointer;font-size:14px;transition:all .3s ease}
-.pill.taken{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent;animation:pulse 2s infinite}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
-.small{font-size:14px;color:#64748b;margin-top:6px}
-.loading{opacity:.7;pointer-events:none}
-.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;justify-content:center;align-items:center;z-index:2000;display:none}
-.loading-spinner{background:white;padding:30px;border-radius:16px;text-align:center;box-shadow:0 15px 35px rgba(0,0,0,.3);min-width:200px}
-.spinner{border:4px solid #f3f3f3;border-top:4px solid var(--brand);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;margin:0 auto 15px}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.empty-state{text-align:center;padding:40px 20px;color:#64748b;font-size:16px}
-.empty-state.success{background:#f0fdf4;border:2px solid #bbf7d0;border-radius:12px;color:#15803d}
-.instructions{background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:12px;margin-bottom:12px;font-size:14px;color:#0369a1}
-.instructions ul{margin:8px 0;padding-right:20px}
-.instructions li{margin-bottom:4px}
-
-/* بطاقة المقارنة مع المؤشرات الدائرية */
-.compare{background:#fff7ed;border:1px solid #fed7aa;border-radius:16px;padding:12px;margin-bottom:10px}
-.compare-title{display:flex;align-items:center;gap:8px;font-weight:800;color:#9a3412}
-.compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px}
-@media (max-width:768px){.compare-grid{grid-template-columns:1fr}}
-.compare-card{background:#fff;border:1px solid #fee2cc;border-radius:14px;padding:12px}
-.kpi{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-weight:700}
-.kpi .label{color:#6b7280;font-weight:600}
-.badge.green{background:#dcfce7;color:#166534;border:1px solid #86efac}
-.badge.red{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
-.badge.gray{background:#f3f4f6;color:#374151;border:1px solid #e5e7eb}
-.circle{--p:0;--c:#10b981;width:84px;height:84px;border-radius:50%;background:
-  conic-gradient(var(--c) calc(var(--p)*1%), #e5e7eb 0);
-  display:grid;place-items:center;font-weight:900;color:#111827}
-.circle small{display:block;font-weight:600;color:#6b7280}
-.circle-wrap{display:flex;align-items:center;gap:10px}
-.circle-abs{--c:#ef4444}
-.kpi-row{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
-.kpi-row .badge{min-width:90px;justify-content:center}
-
-/* نافذة الرمز السري */
-.password-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:3000}
-.password-content{background:white;padding:30px;border-radius:20px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.3);min-width:300px;max-width:90%}
-.password-input{width:100%;padding:15px;border:2px solid #e5e7eb;border-radius:12px;font-size:18px;text-align:center;margin-bottom:15px;font-family:monospace;letter-spacing:2px}
-.password-buttons{display:flex;gap:10px}
-.password-buttons button{flex:1;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer}
-.password-confirm{background:#dc2626;color:white}
-.password-cancel{background:#6b7280;color:white}
-.grade-actions{display:flex;gap:8px;margin-top:10px}
-.grade-actions .btn{flex:1}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المنظومة الرقمية تدبير</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c5aa0;
+            --primary-light: #4a76c5;
+            --primary-dark: #1a3a6d;
+            --secondary: #6a4c9c;
+            --secondary-light: #8b6cb3;
+            --secondary-dark: #4d3670;
+            --accent: #ffc107;
+            --accent-light: #ffd54f;
+            --accent-dark: #ff8f00;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* خلفية ديناميكية */
+        .dynamic-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(44, 90, 160, 0.1), rgba(106, 76, 156, 0.1));
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            right: 5%;
+            animation-delay: 0s;
+        }
+        
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            bottom: 15%;
+            left: 10%;
+            animation-delay: 3s;
+        }
+        
+        .shape-3 {
+            width: 250px;
+            height: 250px;
+            top: 50%;
+            left: 5%;
+            animation-delay: 6s;
+        }
+        
+        .shape-4 {
+            width: 180px;
+            height: 180px;
+            bottom: 25%;
+            right: 15%;
+            animation-delay: 9s;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.7;
+            }
+            33% {
+                transform: translateY(-20px) rotate(120deg);
+                opacity: 0.4;
+            }
+            66% {
+                transform: translateY(15px) rotate(240deg);
+                opacity: 0.6;
+            }
+        }
+        
+        .wave-pattern {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(106, 76, 156, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(44, 90, 160, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 20%, rgba(255, 193, 7, 0.03) 0%, transparent 50%);
+            animation: waveMove 25s infinite linear;
+        }
+        
+        @keyframes waveMove {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* الترويسة */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--primary-dark) 100%);
+            box-shadow: var(--shadow);
+            padding: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: url('https://b.top4top.io/p_3571wctt01.jpg') no-repeat center center;
+            background-size: contain;
+            border-radius: 50%;
+            margin-left: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(44, 90, 160, 0.3);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(44, 90, 160, 0.5), 0 0 40px rgba(44, 90, 160, 0.3);
+            }
+        }
+        
+        .logo-text {
+            text-align: right;
+        }
+        
+        .logo-text h1 {
+            font-size: 2rem;
+            color: var(--white);
+            margin-bottom: 5px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo-text p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+        
+        /* الوقت والتاريخ */
+        .datetime-widget {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .time {
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .date {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* تأثير تناثر الحروف */
+        .floating-letters {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .letter {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5rem;
+            font-weight: bold;
+            animation: float-letters 6s ease-in-out infinite;
+        }
+        
+        @keyframes float-letters {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+                opacity: 1;
+            }
+        }
+        
+        /* موجات الخلفية */
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%23ffffff" fill-opacity="0.1"></path></svg>');
+            background-size: 1200px 100px;
+            animation: wave 12s linear infinite;
+        }
+        
+        .wave2 {
+            animation: wave 15s linear infinite;
+            opacity: 0.5;
+        }
+        
+        .wave3 {
+            animation: wave 18s linear infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes wave {
+            0% {
+                background-position-x: 0;
+            }
+            100% {
+                background-position-x: 1200px;
+            }
+        }
+        
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 0;
+        }
+        
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .welcome-section h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .welcome-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 50%;
+            transform: translateX(50%);
+            width: 100px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+        
+        .welcome-section p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* نظام البطاقات */
+        .systems-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .system-card {
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            cursor: pointer;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .system-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .system-header {
+            padding: 2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 1;
+        }
+        
+        .tadbir .system-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        }
+        
+        .tawasul .system-header {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+        }
+        
+        .system-icon {
+            font-size: 3.5rem;
+            opacity: 0.9;
+        }
+        
+        .system-title {
+            text-align: right;
+        }
+        
+        .system-title h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .system-title p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .system-content {
+            padding: 1.5rem;
+            background: var(--white);
+            display: none;
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            overflow-y: auto;
+        }
+        
+        .system-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .back-btn {
+            background: var(--light);
+            color: var(--dark);
+            border: none;
+            padding: 8px 15px;
+            borderRadius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+        
+        .back-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .back-btn i {
+            margin-right: 5px;
+        }
+        
+        .records-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .record-card {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .record-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .record-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .record-card p {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .platform-content {
+            padding: 1.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .platform-icon {
+            font-size: 4rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .platform-content h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .platform-content p {
+            margin-bottom: 2rem;
+            color: var(--gray);
+            max-width: 500px;
+        }
+        
+        .platform-btn {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .platform-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .platform-btn i {
+            margin-right: 8px;
+        }
+        
+        /* التذييل - مطابق للهيدر */
+        footer {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--primary-dark) 100%);
+            box-shadow: var(--shadow);
+            padding: 2rem 0 1rem;
+            margin-top: auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer-wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%23000000" fill-opacity="0.1"></path></svg>');
+            background-size: 1200px 100px;
+            animation: wave 12s linear infinite;
+        }
+        
+        .footer-wave2 {
+            animation: wave 15s linear infinite;
+            opacity: 0.5;
+        }
+        
+        .footer-wave3 {
+            animation: wave 18s linear infinite;
+            opacity: 0.3;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .footer-column h3 {
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 10px;
+            color: var(--accent-light);
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--accent-light);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column ul li a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-column ul li a:hover {
+            color: var(--accent-light);
+            padding-right: 5px;
+        }
+        
+        .footer-column ul li a i {
+            margin-left: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .footer-column p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* لمسات عبقرية إضافية */
+        
+        /* تأثير النقر على البطاقات */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        /* مؤشر التمرير المخصص */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+        }
+        
+        /* تأثير تحميل عند الدخول */
+        .loading-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* تصميم متجاوب */
+        @media (max-width: 992px) {
+            .systems-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .system-card {
+                height: 250px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .floating-shape {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-section {
+                margin-bottom: 1rem;
+            }
+            
+            .welcome-section h2 {
+                font-size: 2rem;
+            }
+            
+            .system-title h3 {
+                font-size: 1.5rem;
+            }
+            
+            .system-icon {
+                font-size: 2.5rem;
+            }
+            
+            .records-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .time {
+                font-size: 1.5rem;
+            }
+            
+            .date {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  <!-- شريط التحميل -->
-  <div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <div>جاري تحميل البيانات...</div>
+    <!-- شاشة التحميل -->
+    <div class="loading-animation" id="loadingScreen">
+        <div class="loading-spinner"></div>
     </div>
-  </div>
-
-  <!-- نافذة الرمز السري -->
-  <div id="passwordModal" class="password-modal">
-    <div class="password-content">
-      <h3>🔒 تفريغ الوسوم</h3>
-      <p>أدخل الرمز السري للمتابعة:</p>
-      <input type="password" id="passwordInput" class="password-input" placeholder="أدخل الرمز" maxlength="8" autocomplete="one-time-code">
-      <div class="password-buttons">
-        <button class="password-cancel" onclick="closePasswordModal()">إلغاء</button>
-        <button class="password-confirm" onclick="confirmClearMarks()">تأكيد</button>
-      </div>
+    
+    <!-- خلفية ديناميكية -->
+    <div class="dynamic-background">
+        <div class="wave-pattern"></div>
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+        <div class="floating-shape shape-3"></div>
+        <div class="floating-shape shape-4"></div>
     </div>
-  </div>
-
-  <div class="hero">
-    <div class="hero-inner">
-      <div style="flex:1;min-width:200px">
-        <div style="font-weight:700;font-size:20px;margin-bottom:6px">رصد الغياب</div>
-        <div style="opacity:.9;font-size:14px">اختر الصف من “متابعة الصفوف”، ثم حدّد الغائبين واحفظ</div>
-      </div>
-      <div style="text-align:left">
-        <span class="badge" id="statsBadge">جاري التحميل...</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- مقارنة الإحصاءات -->
-  <div id="comparisonCard" class="compare" style="display:none">
-    <div class="compare-title">📊 مقارنة إحصاءات الغياب والحضور</div>
-
-    <div class="compare-grid">
-      <!-- الحصة الأولى -->
-      <div class="compare-card">
-        <div class="kpi"><span class="label">الحصة الأولى</span><span id="kpi-mor-abs" class="badge red">0 غائب</span></div>
-        <div class="circle-wrap">
-          <div class="circle circle-abs" id="circle-mor-abs"><div><div id="circle-mor-abs-txt">0%</div><small>غياب</small></div></div>
-          <div class="circle" id="circle-mor-pres"><div><div id="circle-mor-pres-txt">0%</div><small>حضور</small></div></div>
+    
+    <!-- الترويسة -->
+    <header>
+        <div class="wave"></div>
+        <div class="wave wave2"></div>
+        <div class="wave wave3"></div>
+        
+        <!-- تأثير تناثر الحروف -->
+        <div class="floating-letters" id="floatingLetters"></div>
+        
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo"></div>
+                    <div class="logo-text">
+                        <h1>المنظومة الرقمية تدبير</h1>
+                        <p>نظام متكامل للإدارة المدرسية الذكية</p>
+                    </div>
+                </div>
+                
+                <!-- الوقت والتاريخ -->
+                <div class="datetime-widget">
+                    <div class="time" id="currentTime">00:00:00</div>
+                    <div class="date" id="currentDate">الاثنين، ١ يناير ٢٠٢٤</div>
+                </div>
+            </div>
         </div>
-        <div class="kpi-row">
-          <span class="badge green" id="kpi-mor-pres">0 حاضر</span>
-          <span class="badge gray"  id="kpi-mor-total">0 إجمالي</span>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <div class="container">
+            <div class="welcome-section">
+                <h2>مرحباً بكم في المنظومة الرقمية تدبير</h2>
+                <p>نظام متكامل يجمع بين الإدارة الرقمية الفعالة والتواصل التربوي المتميز لتحويل المدارس إلى مؤسسات رقمية متطورة</p>
+            </div>
+            
+            <div class="systems-container">
+                <!-- نظام تدبير -->
+                <div class="system-card tadbir">
+                    <div class="system-header">
+                        <div class="system-title">
+                            <h3>تدبير</h3>
+                            <p>الإدارة الرقمية المتكاملة</p>
+                        </div>
+                        <div class="system-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="system-content" id="tadbir-content">
+                        <div class="content-header">
+                            <h3>السجلات الإدارية</h3>
+                            <button class="back-btn"><i class="fas fa-arrow-right"></i> العودة</button>
+                        </div>
+                        
+                        <div class="records-grid">
+                            <div class="record-card" data-url="https://script.google.com/macros/s/AKfycbxrvMJE6Z517aK2wnwZJkz58j5UKeIcexguLMBD_s4OV71tUDbmGbEPcqpnsx-v6bi8/exec">
+                                <div class="record-icon">
+                                    <i class="fas fa-user-clock"></i>
+                                </div>
+                                <h4>سجل الاستئذان الرقمي</h4>
+                                <p>تسجيل وإدارة طلبات استئذان الطلاب</p>
+                            </div>
+                            
+                            <div class="record-card" data-url="https://script.google.com/macros/s/AKfycbyc0TUMTXzmu71R_3_WFyDN6t5Wn6YOqPqqfK-2ILiNfLqxtZSQOLzRamZi3KWx4Rz2pA/exec">
+                                <div class="record-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <h4>سجل السلوك الطلابي</h4>
+                                <p>متابعة وتقييم سلوك الطلاب</p>
+                            </div>
+                            
+                            <div class="record-card" data-url="https://script.google.com/macros/s/AKfycbwQsRYxATGP5XEwrbPaKdl7mzI-p-bz_ZAI9Tw4CZKFrsshmsYoCl1neGFtrjuC7JpB/exec">
+                                <div class="record-icon">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                                <h4>سجل التأخر الصباحي</h4>
+                                <p>تسجيل حالات تأخر الطلاب الصباحية</p>
+                            </div>
+                            
+                            <div class="record-card" data-url="https://script.google.com/macros/s/AKfycbxyfIl0345fmByy3uMqcCchVYO2ZreLxirqDjLWwcQKh0g87qwiWwxQQoDwia95nJqVSg/exec">
+                                <div class="record-icon">
+                                    <i class="fas fa-user-friends"></i>
+                                </div>
+                                <h4>سجل الزوار</h4>
+                                <p>تسجيل بيانات زوار المدرسة</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- نظام تواصل -->
+                <div class="system-card tawasul">
+                    <div class="system-header">
+                        <div class="system-title">
+                            <h3>تواصل</h3>
+                            <p>التفاعل التربوي والمجتمعي</p>
+                        </div>
+                        <div class="system-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="system-content" id="tawasul-content">
+                        <div class="content-header">
+                            <h3>منصة التواصل التربوي</h3>
+                            <button class="back-btn"><i class="fas fa-arrow-right"></i> العودة</button>
+                        </div>
+                        
+                        <div class="platform-content">
+                            <div class="platform-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <h3>منصة تواصل التفاعلية</h3>
+                            <p>منصة التواصل التربوي والمجتمعي التي تربط بين المدرسة والمجتمع، وتوفر قنوات اتصال متعددة بين الإدارة والمعلمين والطلاب وأولياء الأمور.</p>
+                            <button class="platform-btn" id="openPlatform">
+                                <i class="fas fa-external-link-alt"></i> الانتقال إلى المنصة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+    </main>
 
-      <!-- الحالة الطارئة -->
-      <div class="compare-card">
-        <div class="kpi"><span class="label">الحالة الطارئة</span><span id="kpi-em-abs" class="badge red">0 غائب</span></div>
-        <div class="circle-wrap">
-          <div class="circle circle-abs" id="circle-em-abs"><div><div id="circle-em-abs-txt">0%</div><small>غياب</small></div></div>
-          <div class="circle" id="circle-em-pres"><div><div id="circle-em-pres-txt">0%</div><small>حضور</small></div></div>
+    <!-- التذييل - مطابق للهيدر -->
+    <footer>
+        <div class="footer-wave"></div>
+        <div class="footer-wave footer-wave2"></div>
+        <div class="footer-wave footer-wave3"></div>
+        
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>عن المنظومة</h3>
+                    <p>المنظومة الرقمية تدبير هي نظام متكامل للإدارة المدرسية الذكية يهدف إلى تحويل المدارس إلى مؤسسات رقمية متطورة.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>روابط سريعة</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-home"></i> الرئيسية</a></li>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> عن المنظومة</a></li>
+                        <li><a href="#"><i class="fas fa-star"></i> المميزات</a></li>
+                        <li><a href="#"><i class="fas fa-phone"></i> اتصل بنا</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>الأنظمة</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-tasks"></i> تدبير - الإدارة الرقمية</a></li>
+                        <li><a href="#"><i class="fas fa-comments"></i> تواصل - التفاعل التربوي</a></li>
+                        <li><a href="#"><i class="fas fa-link"></i> التكامل مع الأنظمة</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>اتصل بنا</h3>
+                    <ul>
+                        <li><a href="tel:009682588990"><i class="fas fa-phone"></i> 009682588990</a></li>
+                        <li><a href="mailto:sc7211@moe.om"><i class="fas fa-envelope"></i> sc7211@moe.om</a></li>
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> سلطنة عمان - محافظة الظاهرة - ولاية عبري - الدريز</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>جميع الحقوق محفوظة © 2025 المنظومة الرقمية تدبير</p>
+            </div>
         </div>
-        <div class="kpi-row">
-          <span class="badge green" id="kpi-em-pres">0 حاضر</span>
-          <span class="badge gray"  id="kpi-em-total">0 إجمالي</span>
-        </div>
-      </div>
+    </footer>
 
-      <!-- الفروقات -->
-      <div class="compare-card">
-        <div class="kpi"><span class="label">الفرق في الغياب</span><span id="kpi-diff-abs" class="badge gray">0</span></div>
-        <div class="kpi"><span class="label">فرق نسبة الغياب</span><span id="kpi-diff-rate" class="badge gray">0%</span></div>
-        <div class="kpi"><span class="label">فرق نسبة الحضور</span><span id="kpi-diff-presRate" class="badge gray">0%</span></div>
-        <div class="kpi"><span class="label">الحالة</span><span id="differenceStatus" class="badge gray">متماثل</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- تعليمات -->
-  <div class="instructions">
-    <strong>طريقة الاستخدام:</strong>
-    <ul>
-      <li>اختر الصف من “متابعة الصفوف”.</li>
-      <li>حدّد الطلاب الغائبين بمربعات الاختيار.</li>
-      <li>اضغط “💾 حفظ الغياب المحدد”.</li>
-      <li>زر “عرض الغائبين” يعرض كل الغياب في الوضع الحالي.</li>
-    </ul>
-  </div>
-
-  <!-- متابعة الصفوف -->
-  <div class="card">
-    <div style="font-weight:700;margin-bottom:6px;font-size:16px">متابعة الصفوف</div>
-    <div id="statusList" class="status-list"></div>
-    <div class="small">اللون الأخضر يعني تم تسجيل الغياب للصف</div>
-  </div>
-
-  <!-- منطقة العمل -->
-  <div class="card">
-    <div class="grid3">
-      <select id="mode" class="select">
-        <option value="الحصة الأولى">الحصة الأولى</option>
-        <option value="حالة طارئة">حالة طارئة</option>
-      </select>
-      <button class="btn secondary" id="showAbsentsBtn" type="button" style="width:100%">👀 عرض الغائبين</button>
-      <button class="btn secondary" id="exportCsvBtn" type="button" style="width:100%">📤 تصدير الغائبين (CSV)</button>
-    </div>
-
-    <div id="gradeActions" class="grade-actions" style="display:none">
-      <button class="btn primary" id="saveBulkBtn" type="button">💾 حفظ الغياب المحدد</button>
-    </div>
-
-    <div id="list" class="list" style="display:none"></div>
-    <div id="empty" class="empty-state">اختر الصف لتحميل الأسماء...</div>
-
-    <div id="absentsBox" class="card" style="margin-top:12px;display:none">
-      <div style="font-weight:700">الغائبون (<span id="absCount">0</span>)</div>
-      <div id="absContent" style="margin-top:6px"></div>
-    </div>
-  </div>
-</div>
-
-<!-- الشريط السفلي -->
-<div class="sticky">
-  <div class="actions-group">
-    <button class="btn danger" id="clearMarksBtn" type="button">🗑️ تفريغ الوسوم</button>
-    <button class="btn secondary" id="showAbsentsBtnFooter" type="button">👀 عرض الغائبين</button>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script>
-// ========= إعداد API (ضع رابط النشر الخاص بك هنا) =========
-const API_URL = 'https://script.google.com/macros/s/AKfycbyNqFhY9RFxhW1joUSJ1as7PbDHCVAxpteZ0dmlBFuQf8llWU_XAu5KQMIjAu1nzPod/exec';
-
-async function apiCall(action, payload = {}) {
-  const body = new URLSearchParams({ action, data: JSON.stringify(payload) });
-  const res = await fetch(API_URL + `?_ts=${Date.now()}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8','Cache-Control':'no-cache' },
-    body,
-    cache: 'no-store'
-  });
-  const text = await res.text();
-  try { return JSON.parse(text); } catch { return { ok:false, error:text }; }
-}
-
-// ========= أدوات واجهة =========
-const qs = s => document.querySelector(s);
-let CURRENT_LIST = [];
-let SELECTED_ROWS = new Set();
-let CURRENT_GRADE = '';
-
-// صوت & توست
-function playSuccessSound(){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.setValueAtTime(800,c.currentTime);o.frequency.setValueAtTime(1000,c.currentTime+.1);o.frequency.setValueAtTime(1200,c.currentTime+.2);g.gain.setValueAtTime(.3,c.currentTime);g.gain.exponentialRampToValueAtTime(.01,c.currentTime+.3);o.start(c.currentTime);o.stop(c.currentTime+.3);}catch(e){}}
-function createConfetti(){try{const colors=['#ffd700','#ff6b6b','#4ecdc4','#45b7d1','#96ceb4','#feca57'];for(let i=0;i<20;i++){const d=document.createElement('div');d.className='confetti';d.style.left=Math.random()*100+'vw';d.style.background=colors[Math.floor(Math.random()*colors.length)];d.style.animationDelay=Math.random()*1+'s';d.style.width='8px';d.style.height='8px';document.body.appendChild(d);setTimeout(()=>d.remove(),3000);}}catch(e){}}
-const showToast=(msg,isSuccess=false)=>{const t=qs('#toast');if(!t)return;t.textContent=msg;t.className=isSuccess?'toast success-toast':'toast';t.style.display='block';t.style.animation='none';setTimeout(()=>{t.style.animation=''},10);if(isSuccess){playSuccessSound();createConfetti();}setTimeout(()=>{t.style.display='none'},3000);};
-
-// تحميل
-function showLoading(m='جاري تحميل البيانات...'){const ov=qs('#loadingOverlay');ov.querySelector('.loading-spinner div:last-child').textContent=m;ov.style.display='flex';document.body.classList.add('loading');}
-function hideLoading(){qs('#loadingOverlay').style.display='none';document.body.classList.remove('loading')}
-
-// ====== مقارنة وإحصاءات ======
-const pct = (num,den)=> den>0? Math.round((num/den)*100):0;
-function setCircle(el, percent){ el.style.setProperty('--p', percent); }
-
-function updateComparison(data){
-  const card=qs('#comparisonCard');
-  if(!(data.morning && data.emergency)){ card.style.display='none'; return; }
-
-  const m = data.morning, e = data.emergency;
-  const mPres = (m.total||0) - (m.absent||0);
-  const ePres = (e.total||0) - (e.absent||0);
-
-  const mAbsRate = pct(m.absent, m.total), eAbsRate = pct(e.absent, e.total);
-  const mPresRate = pct(mPres, m.total),   ePresRate = pct(ePres, e.total);
-
-  // الحصة الأولى
-  qs('#kpi-mor-abs').textContent = `${m.absent||0} غائب`;
-  qs('#kpi-mor-pres').textContent = `${mPres} حاضر`;
-  qs('#kpi-mor-total').textContent = `${m.total||0} إجمالي`;
-  setCircle(qs('#circle-mor-abs'), mAbsRate); qs('#circle-mor-abs-txt').textContent = mAbsRate+'%';
-  setCircle(qs('#circle-mor-pres'), mPresRate); qs('#circle-mor-pres-txt').textContent = mPresRate+'%';
-
-  // الحالة الطارئة
-  qs('#kpi-em-abs').textContent = `${e.absent||0} غائب`;
-  qs('#kpi-em-pres').textContent = `${ePres} حاضر`;
-  qs('#kpi-em-total').textContent = `${e.total||0} إجمالي`;
-  setCircle(qs('#circle-em-abs'), eAbsRate); qs('#circle-em-abs-txt').textContent = eAbsRate+'%';
-  setCircle(qs('#circle-em-pres'), ePresRate); qs('#circle-em-pres-txt').textContent = ePresRate+'%';
-
-  // الفروقات
-  const diffAbs = (m.absent||0) - (e.absent||0);
-  const diffRate = mAbsRate - eAbsRate;
-  const diffPresRate = mPresRate - ePresRate;
-  qs('#kpi-diff-abs').textContent = (diffAbs>0? '+'+diffAbs : diffAbs);
-  qs('#kpi-diff-rate').textContent = (diffRate>0? '+'+diffRate : diffRate) + '%';
-  qs('#kpi-diff-presRate').textContent = (diffPresRate>0? '+'+diffPresRate : diffPresRate) + '%';
-  const statusEl=qs('#differenceStatus');
-  if(diffAbs>0){ statusEl.textContent='زيادة غياب بالحصة الأولى'; statusEl.className='badge red'; }
-  else if(diffAbs<0){ statusEl.textContent='زيادة غياب بالحالة الطارئة'; statusEl.className='badge red'; }
-  else { statusEl.textContent='متماثل'; statusEl.className='badge gray'; }
-
-  card.style.display='block';
-}
-
-function updateBadge(data){
-  if(!data) return;
-  const cur=data.current||data;
-  const t=cur.total??0, a=cur.absent??0, p=cur.present??(t-a);
-  qs('#statsBadge').textContent=`${data.mode||'-'} | الإجمالي: ${t} | غائب: ${a} | حاضر: ${p}`;
-  updateComparison(data);
-  if(data.statuses) renderStatuses(data.statuses);
-}
-
-// ====== متابعة الصفوف ======
-function renderStatuses(statuses){
-  const box=qs('#statusList'); box.innerHTML='';
-  (statuses||[]).forEach(st=>{
-    const pill=document.createElement('div');
-    pill.className='pill'+(st.taken?' taken':'');
-    pill.innerHTML=(st.taken?'✅ ':'⏳ ')+`<span>${st.grade}</span>`;
-    pill.title=st.taken?'تم تسجيل الغياب لهذا الصف':'لم يتم التسجيل بعد';
-    pill.addEventListener('click',()=> onGradeSelected(st.grade));
-    box.appendChild(pill);
-  });
-}
-
-async function onGradeSelected(grade){
-  CURRENT_GRADE=grade;
-  const actions=qs('#gradeActions'); if(actions){actions.style.display= grade? 'flex':'none'}
-  const list=qs('#list'), empty=qs('#empty');
-  // إعادة تهيئة واجهة القائمة دومًا
-  list.style.display='none'; list.innerHTML='';
-  empty.style.display='block'; empty.textContent='جاري تحميل الطلاب...'; empty.className='empty-state';
-
-  if(!grade){ empty.textContent='اختر الصف لتحميل الأسماء...'; return; }
-
-  showLoading('جاري تحميل بيانات الصف...');
-  const res = await apiCall('ensureBaselineOnGrade',{ grade });
-  if(!res || res.error){ showToast('❌ حدث خطأ في تحميل الصف'); hideLoading(); return; }
-  updateBadge(res);
-  await loadGradeListOnly();
-  hideLoading();
-}
-
-async function loadGradeListOnly(){
-  const grade=CURRENT_GRADE; if(!grade) return;
-  showLoading('جاري تحميل قائمة الطلاب...');
-  const listRes = await apiCall('getStudentsByGrade',{ grade });
-  const list=qs('#list'), empty=qs('#empty');
-  if(!Array.isArray(listRes)){ showToast('❌ خطأ في تحميل قائمة الطلاب'); empty.textContent='فشل التحميل'; hideLoading(); return; }
-  CURRENT_LIST = listRes;
-  SELECTED_ROWS.clear();
-  renderList();
-  updateSelectionCount();
-  hideLoading();
-}
-
-function renderList(){
-  const list=qs('#list'), empty=qs('#empty');
-  list.innerHTML='';
-  if(!CURRENT_LIST.length){
-    list.style.display='none';
-    empty.style.display='block';
-    empty.textContent='لا توجد نتائج';
-    empty.className='empty-state';
-    return;
-  }
-  empty.style.display='none';
-  list.style.display='block';
-
-  CURRENT_LIST.forEach(st=>{
-    const item=document.createElement('div'); item.className='item';
-    const checkbox=document.createElement('input'); checkbox.type='checkbox';
-    checkbox.checked=SELECTED_ROWS.has(st.row);
-    checkbox.addEventListener('change',()=>{ if(checkbox.checked){SELECTED_ROWS.add(st.row)} else {SELECTED_ROWS.delete(st.row)}; updateSelectionCount(); });
-    const info=document.createElement('div'); info.style.flex='1';
-    const name=document.createElement('div'); name.className='name'; name.textContent=st.name;
-    const meta=document.createElement('div'); meta.className='meta'; meta.textContent=`الصف: ${st.grade} - الرقم: ${st.id}`;
-    info.appendChild(name); info.appendChild(meta);
-    const tag=document.createElement('span'); tag.className='tag';
-    tag.textContent=st.state==='غائب'?'غائب':'حاضر';
-    tag.style.background=st.state==='غائب'?'#fee2e2':'#d1fae5';
-    tag.style.color=st.state==='غائب'?'#991b1b':'#065f46';
-    tag.style.borderColor=st.state==='غائب'?'#fecaca':'#a7f3d0';
-    item.appendChild(checkbox); item.appendChild(info); item.appendChild(tag);
-    list.appendChild(item);
-  });
-  updateSelectionCount();
-}
-
-function updateSelectionCount(){
-  const save=qs('#saveBulkBtn');
-  if(!save) return;
-  const count=SELECTED_ROWS.size;
-  const total=CURRENT_LIST.length||0;
-  if(count>0){ save.textContent = `💾 حفظ (${count} غائب من ${total})`; }
-  else{ save.textContent = `💾 حفظ (الكل حاضر — ${total} طالب)`; }
-}
-
-// ====== حفظ ======
-async function saveBulk(){
-  const grade=CURRENT_GRADE; if(!grade){showToast('❌ اختر صفًا أولاً');return;}
-  showLoading('جاري تسجيل الغياب...');
-  const absentRows=[...SELECTED_ROWS];
-  const res = await apiCall('smartMarkGrade',{ grade, absentRows });
-  if(res?.ok){
-    const msg= absentRows.length>0? `✅ تم التسجيل: ${res.presentCount||0} حاضر, ${res.absentCount||0} غائب`
-                                  : `✅ تم تسجيل حضور للصف كاملاً (${res.presentCount||0} طالب)`;
-    showToast(msg,true);
-    updateBadge(res);
-    // تفريغ واجهة هذا الصف فقط — وسيتم ملؤها عند اختيار صف جديد
-    const list=qs('#list'), empty=qs('#empty');
-    list.style.display='none'; list.innerHTML='';
-    empty.style.display='block'; empty.textContent='✅ تم الحفظ بنجاح! اختر صفًا آخر'; empty.className='empty-state success';
-    SELECTED_ROWS.clear(); CURRENT_LIST=[];
-  }else{
-    showToast('❌ حدث خطأ في الحفظ: '+(res?.message||res?.error||'غير معروف'));
-  }
-  hideLoading();
-}
-
-// ====== عرض/تصدير الغائبين ======
-async function showAbsentsAll(){
-  showLoading('جاري تحميل قائمة الغائبين...');
-  const res = await apiCall('listAbsentsAll',{});
-  const box=qs('#absentsBox'); const content=qs('#absContent');
-  content.innerHTML='';
-  const total=res?.total??0; qs('#absCount').textContent=total;
-  if(total===0){content.textContent='لا يوجد غياب في جميع الصفوف.'; box.style.display='block'; hideLoading(); return;}
-  (res?.byGrade||[]).forEach(g=>{
-    const h=document.createElement('div'); h.style.fontWeight='700'; h.style.marginTop='12px'; h.textContent=`${g.grade} — (${g.count})`;
-    content.appendChild(h);
-    const ul=document.createElement('ul'); ul.style.paddingRight='20px'; ul.style.marginTop='6px';
-    g.names.forEach(s=>{ const li=document.createElement('li'); li.textContent=`${s.name} — رقم: ${s.id||'-'}`; li.style.marginBottom='4px'; ul.appendChild(li); });
-    content.appendChild(ul);
-  });
-  box.style.display='block'; hideLoading();
-}
-
-async function exportAbsentsCsv(){
-  showLoading('جاري تجهيز ملف CSV...');
-  const res = await apiCall('listAbsentsAll',{});
-  const rows = [['الصف','الاسم','الرقم']];
-  (res?.byGrade||[]).forEach(g=>{
-    (g.names||[]).forEach(s=> rows.push([g.grade, s.name, s.id||'']));
-  });
-  const csv = rows.map(r=> r.map(x=> `"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `absents-${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-  hideLoading();
-  showToast('📤 تم تنزيل ملف الغائبين (CSV)', true);
-}
-
-// ====== الرمز السري ======
-function openPasswordModal(){const m=qs('#passwordModal');const i=qs('#passwordInput');if(m&&i){m.style.display='flex';i.value='';i.focus();}}
-function closePasswordModal(){const m=qs('#passwordModal'); if(m){m.style.display='none';}}
-async function confirmClearMarks(){
-  const password=qs('#passwordInput').value;
-  if(!password){showToast('❌ الرجاء إدخال الرمز السري');return;}
-  showLoading('جاري التحقق من الرمز...');
-  const check = await apiCall('verifyPassword',{ password });
-  if(check?.ok){
-    const res = await apiCall('clearAllMarks',{ password });
-    if(res?.ok){
-      updateBadge(res);
-      const list=qs('#list'), empty=qs('#empty');
-      list.style.display='none'; list.innerHTML='';
-      empty.style.display='block'; empty.textContent='اختر الصف لتحميل الأسماء...'; empty.className='empty-state';
-      qs('#gradeActions').style.display='none';
-      SELECTED_ROWS.clear(); CURRENT_LIST=[];
-      hideLoading(); closePasswordModal(); showToast('✅ تم مسح جميع الوسوم بنجاح',true);
-    }else{
-      hideLoading(); showToast('❌ '+(res?.message||res?.error||'فشل غير معروف'));
-    }
-  }else{
-    hideLoading(); showToast('❌ الرمز السري غير صحيح');
-  }
-}
-
-// ====== تهيئة ======
-document.addEventListener('DOMContentLoaded', async ()=>{
-  showLoading('جاري تحميل التطبيق...');
-  const data = await apiCall('getInitial',{});
-  if(!data || data.error){ showToast('❌ خطأ في تحميل البيانات الأولية'); hideLoading(); return; }
-  qs('#mode').value=data?.mode||'الحصة الأولى';
-  renderStatuses(data?.statuses||[]);
-  updateBadge(data);
-  hideLoading();
-});
-
-// أحداث
-qs('#mode').addEventListener('change', async e=>{
-  showLoading('جاري تغيير وضع الرصد...');
-  const res = await apiCall('setMode',{ mode:e.target.value });
-  if(!res || res.error){ showToast('❌ حدث خطأ في تغيير الوضع'); hideLoading(); return; }
-  updateBadge(res);
-  if(CURRENT_GRADE){ await loadGradeListOnly(); }
-  hideLoading();
-});
-qs('#saveBulkBtn').addEventListener('click', saveBulk);
-qs('#showAbsentsBtn').addEventListener('click', showAbsentsAll);
-qs('#showAbsentsBtnFooter').addEventListener('click', showAbsentsAll);
-qs('#exportCsvBtn').addEventListener('click', exportAbsentsCsv);
-qs('#clearMarksBtn').addEventListener('click', openPasswordModal);
-document.addEventListener('keypress', e=>{ if(e.key==='Enter' && qs('#passwordModal').style.display==='flex'){ confirmClearMarks(); }});
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const systemCards = document.querySelectorAll('.system-card');
+            const backButtons = document.querySelectorAll('.back-btn');
+            const recordCards = document.querySelectorAll('.record-card');
+            const openPlatformBtn = document.getElementById('openPlatform');
+            const floatingLetters = document.getElementById('floatingLetters');
+            const currentTime = document.getElementById('currentTime');
+            const currentDate = document.getElementById('currentDate');
+            const loadingScreen = document.getElementById('loadingScreen');
+            
+            // إخفاء شاشة التحميل بعد تحميل الصفحة
+            setTimeout(() => {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 1500);
+            
+            // تأثير النقر على البطاقات
+            systemCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // التأكد من أن النقر لم يكن على زر العودة أو سجل
+                    if (!e.target.closest('.back-btn') && !e.target.closest('.record-card')) {
+                        // تأثير ripple
+                        const ripple = document.createElement('div');
+                        ripple.className = 'ripple';
+                        ripple.style.left = e.offsetX + 'px';
+                        ripple.style.top = e.offsetY + 'px';
+                        this.appendChild(ripple);
+                        
+                        setTimeout(() => {
+                            ripple.remove();
+                        }, 600);
+                        
+                        const content = this.querySelector('.system-content');
+                        content.classList.add('active');
+                    }
+                });
+            });
+            
+            // تحديث الوقت والتاريخ
+            function updateDateTime() {
+                const now = new Date();
+                
+                // تنسيق الوقت
+                const timeOptions = { 
+                    hour12: true, 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                };
+                const timeString = now.toLocaleTimeString('ar-OM', timeOptions);
+                currentTime.textContent = timeString;
+                
+                // تنسيق التاريخ
+                const dateOptions = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                };
+                const dateString = now.toLocaleDateString('ar-OM', dateOptions);
+                currentDate.textContent = dateString;
+            }
+            
+            // تحديث الوقت كل ثانية
+            setInterval(updateDateTime, 1000);
+            updateDateTime(); // التشغيل الأولي
+            
+            // إنشاء تأثير تناثر الحروف
+            function createFloatingLetters() {
+                const letters = ['ت', 'د', 'ب', 'ي', 'ر'];
+                const header = document.querySelector('header');
+                const headerRect = header.getBoundingClientRect();
+                
+                letters.forEach((letter, index) => {
+                    const letterElement = document.createElement('div');
+                    letterElement.className = 'letter';
+                    letterElement.textContent = letter;
+                    letterElement.style.left = `${Math.random() * 100}%`;
+                    letterElement.style.top = `${Math.random() * 100}%`;
+                    letterElement.style.animationDelay = `${index * 0.5}s`;
+                    floatingLetters.appendChild(letterElement);
+                });
+            }
+            
+            // العودة إلى الواجهة الرئيسية
+            backButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const content = this.closest('.system-content');
+                    content.classList.remove('active');
+                });
+            });
+            
+            // فتح السجلات الإدارية في نافذة جديدة
+            recordCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const url = this.getAttribute('data-url');
+                    if (url) {
+                        window.open(url, '_blank');
+                    }
+                });
+            });
+            
+            // فتح منصة تواصل في نافذة جديدة
+            openPlatformBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                window.open('https://mohdschool.github.io/platform/', '_blank');
+            });
+            
+            // تأثيرات بصرية إضافية
+            systemCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.2}s`;
+            });
+            
+            // إنشاء الحروف المتطايرة
+            createFloatingLetters();
+        });
+    </script>
 </body>
 </html>
